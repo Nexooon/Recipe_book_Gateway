@@ -1,0 +1,42 @@
+pipeline {
+    agent any
+
+    tools {
+        jdk 'jdk-17'
+        maven "M3"
+        git "Default"
+    }
+
+    stages {
+        stage('Build') {
+            steps {
+                sh "mvn verify"
+            }
+        }
+    }
+    post {
+        success {
+            githubNotify(
+                status: 'SUCCESS',
+                account: "Nexooon",
+                credentialsId: "github",
+                context: 'Jenkins',
+                description: 'Build succeeded',
+                repo: "config-server",
+                sha: env.GIT_COMMIT
+            )
+        }
+
+        failure {
+            githubNotify(
+                status: 'FAILURE',
+                account: "Nexooon",
+                credentialsId: "github",
+                context: 'Jenkins',
+                description: 'Build failed',
+                repo: "config-server",
+                sha: env.GIT_COMMIT
+            )
+        }
+    }
+}
